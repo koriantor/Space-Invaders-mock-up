@@ -1,35 +1,15 @@
-#include <allegro5/allegro.h>
-#include <allegro5/allegro_native_dialog.h>
-#include <allegro5/allegro_image.h>
-#include <vector>
-#include "Ship.h"
-#include "Laser.h"
-
-using namespace std;
+#include "allegro_test.h"
 
 
-
-
-enum{
-	RIGHT,
-	LEFT,
-	SPACE
-};
 
  
 int main(int argc, char **argv){
 
 
 	//**GAME SPECIFIC VARIABLES**
-	const int WIDTH = 720;
-	const int HEIGHT = 480;
-
 	bool done = false;
 	bool display_changed = true;
-	double FPS = 60.0;
 
-	const int LASER_SPEED = 0;
-	const int LASER_COOLDOWN = 15;
 	int laser_cooldown = 0;
 	laser* laser0;
 
