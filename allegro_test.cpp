@@ -156,24 +156,34 @@ int main(int argc, char **argv){
 
 
 		//timer events(frame refresh)
-		else{
+		else if (ev.type == ALLEGRO_EVENT_TIMER){
 			//check player ship movement
 			if (keys[RIGHT]){
+				/* OLD CODE 
+
 				if (player.posX <= 720 - player.width - player.speedX){
 					player.posX += player.speedX;
 					display_changed = true;
 				}
+				//*  END OLD CODE*/
+				rightKeyEvents();
 			}
 
 			if (keys[LEFT]){
+				/* OLD CODE 
+
 				if (player.posX >= player.speedX){
 					player.posX -= player.speedX;
 					display_changed = true;
 				}
+				//*  END OLD CODE*/
+				leftKeyEvents();
 			}
 			
 			//manage player lasers
 			if (keys[SPACE]){
+				/* OLD CODE 
+
 				if (laser_cooldown == 0){
 					//make new laser
 					const int LASER_OFFSET = 10;
@@ -185,11 +195,15 @@ int main(int argc, char **argv){
 					//reset coodlown
 					laser_cooldown = LASER_COOLDOWN;
 				}
+				//*  END OLD CODE*/
+				spaceKeyEvents();
 			}
+
 			if (laser_cooldown > 0){
 				//decrement cooldown
 				laser_cooldown--;
 			}
+
 			if (!player_lasers.empty()){
 				//if there are still lasers on screen, then update them on the display
 				display_changed = true;
@@ -367,5 +381,46 @@ void keyUpEvents(ALLEGRO_EVENT ev0){
 	}
 }
 
+//********************
+//Perform all calculations related to the right arrow key pressed
+//
+//********************
+
+void rightKeyEvents(){
+	if (player.posX <= 720 - player.width - player.speedX){
+		player.posX += player.speedX;
+		display_changed = true;
+	}
+}
+
+//********************
+//Perform all calculations related to the Left Arrow key pressed
+//
+//********************
+
+void leftKeyEvents(){
+	if (player.posX >= player.speedX){
+		player.posX -= player.speedX;
+		display_changed = true;
+	}
+}
+
+//********************
+//Perform all calculations related to the Space key pressed
+//
+//********************
+
+void spaceKeyEvents(){
+	//if able to fire laser
+	if (laser_cooldown == 0){
+
+		//make new laser
+		player_lasers.push_back(laser(48, 0, 48, 48, player.posX, player.posY - LASER_OFFSET, 0, LASER_SPEED));
+
+	 
+		//reset coodlown
+		laser_cooldown = LASER_COOLDOWN;
+	}
+}
 
 

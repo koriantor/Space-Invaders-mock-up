@@ -7,14 +7,20 @@
 
 using namespace std;
 
+//GLOBAL CONSTANTS
+//****************
 
+//dispaly values
 #define WIDTH 720
 #define HEIGHT 480
 
 #define FPS 60.0
 
+//laser values
 #define LASER_SPEED -10
 #define LASER_COOLDOWN 15
+
+#define LASER_OFFSET 10
 
 enum{
 	RIGHT,
@@ -46,3 +52,7 @@ ALLEGRO_DISPLAY* startAllegro(int width0, int height0);
 
 void keyDownEvents(ALLEGRO_EVENT ev0);
 void keyUpEvents(ALLEGRO_EVENT ev0);
+
+void rightKeyEvents();
+void leftKeyEvents();
+void spaceKeyEvents();
