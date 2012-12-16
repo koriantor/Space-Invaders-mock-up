@@ -6,16 +6,14 @@
 int main(int argc, char **argv){
 
 
-	//**GAME SPECIFIC VARIABLES**
-	bool done = false;
-	bool display_changed = true;
+	//GLOBAL VARIABLE DECLARATIONS
+	//****************************************
+	done = false;
+	display_changed = true;
 
-	int laser_cooldown = 0;
-	laser* laser0;
+	laser_cooldown = 0;
 
 
-	//player's ship
-	ship player;
 	//**player ship information
 	player.spriteX = 0;
 	player.spriteY = 0;
@@ -27,48 +25,27 @@ int main(int argc, char **argv){
 	//**end player ship
 	
 
-
-	//player's lasers
-	vector<laser> player_lasers;
-	//**end player lasers
-
-
+	//setup keyboard (with 3 keys for game)
+	for (int i = 0; i < 3; i++){
+		keys[i] = false;
+	}
+	//***************************************
 
 
 
 	//**ALLEGRO SPECIFIC CODE**
 	
-	if(!al_init()) {
-		al_show_native_message_box(NULL, NULL, NULL,
-			"failed to initialize allegro!", NULL, NULL);
+	
+	//call allegro start funcion and verify succesful start
+	ALLEGRO_DISPLAY *display = startAllegro(WIDTH, HEIGHT);
+
+	if (display == NULL){
 		return -1;
 	}
- 
-	//setup display
-	ALLEGRO_DISPLAY *display = NULL;
 
-	display = al_create_display(WIDTH, HEIGHT);
-	if(!display) {
-		al_show_native_message_box(NULL, NULL, NULL,
-			"failed to create display!\n", NULL, NULL);
-		return -1;
-	}
- 
-	//display nuetral black screen immediately
-	al_clear_to_color(al_map_rgb(0,0,0));
-	al_flip_display();
+	
 
-
-
-
-	//setup keyboard
-	al_install_keyboard();
-	bool keys[3] = {false, false, false};
-
-
-
-
-	//register events
+	//REGISTER EVENTS
 	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 	event_queue = al_create_event_queue();
 
@@ -81,27 +58,18 @@ int main(int argc, char **argv){
 	al_register_event_source(event_queue, al_get_timer_event_source(timer));
 
 
-
-
-	//initialize image addon and load sprites
-	al_init_image_addon();
-
-	//player's ship created
-	ALLEGRO_BITMAP* player_spritesheet = al_load_bitmap("player_spritesheet.png");
 	
+
+	//MASTER SPRITE SHEET
+	ALLEGRO_BITMAP* player_spritesheet = al_load_bitmap("player_spritesheet.png");
 	al_convert_mask_to_alpha(player_spritesheet, al_map_rgb(255,0,255));
 
-	//draw ship
+	//draw player ship in starting position
 	al_draw_bitmap_region(player_spritesheet, player.spriteX, player.spriteY,
 						 player.width, player.height, player.posX, player.posY, 0);
 
 	al_flip_display();
 	display_changed = false;
-
-
-
-
-
 
 
 
@@ -124,6 +92,10 @@ int main(int argc, char **argv){
 		//key down events
 		if (ev.type == ALLEGRO_EVENT_KEY_DOWN){
 
+			keyDownEvents(ev);
+
+			/* OLD CODE
+
 			switch(ev.keyboard.keycode){
 
 				/*
@@ -134,7 +106,7 @@ int main(int argc, char **argv){
 				[1] - LEFT
 				[2] - SPACE
 				
-				*/
+				/
 
 			case ALLEGRO_KEY_RIGHT:
 				keys[RIGHT] = true;
@@ -150,9 +122,15 @@ int main(int argc, char **argv){
 
 			}
 
+			//*  END OLD CODE */
+
 		}
 		//key up events
 		else if (ev.type == ALLEGRO_EVENT_KEY_UP){
+
+			keyUpEvents(ev);
+
+			/* OLD CODE
 
 			switch(ev.keyboard.keycode){
 
@@ -172,6 +150,7 @@ int main(int argc, char **argv){
 				done = true;
 				break;
 			}
+			//*/
 
 		}
 
@@ -199,13 +178,7 @@ int main(int argc, char **argv){
 					//make new laser
 					const int LASER_OFFSET = 10;
 					
-	
-					/*OLD CODE
-					laser0 = new laser(player.posX, player.posY - LASER_OFFSET, 0, LASER_SPEED, "player_laser.png");
-					//store laser
-					player_lasers.push_back(*laser0);
-					//*/
-	
+		
 					player_lasers.push_back(laser(48, 0, 48, 48, player.posX, player.posY - LASER_OFFSET, 0, LASER_SPEED));
 	
 	
@@ -234,11 +207,7 @@ int main(int argc, char **argv){
 				for (size_t i = 0; i < player_lasers.size(); i++){
 					if (player_lasers[i].getPosY() > 0 - player_lasers[i].getHeight()){
 						
-						/* OLD CODE
-						ALLEGRO_BITMAP* image0 = al_load_bitmap( player_lasers[i].getFilename() );
-						al_convert_mask_to_alpha(image0, al_map_rgb(255,0,255));
-						//*/
-	
+							
 	
 						//draw sprite from data defined in laser object
 						al_draw_bitmap_region ( player_spritesheet, 
@@ -247,10 +216,7 @@ int main(int argc, char **argv){
 											 player_lasers[i].getPosX(), player_lasers[i].getPosY(),    0);
 						player_lasers[i].move();
 						
-						/* OLD CODE
-						//Destroy the bitmap before leaving the context
-						al_destroy_bitmap(image0);
-						//*/
+						
 					}else{
 						player_lasers.erase(player_lasers.begin() + i);
 						i--;
@@ -277,11 +243,10 @@ int main(int argc, char **argv){
 	}
 
 	//destroy all lasers
-	//*
 	while(!player_lasers.empty()){
 		//al_destroy_bitmap(player_lasers[0].image);
 		player_lasers.erase(player_lasers.begin());
-	}//*/
+	}
 
 
 	al_destroy_bitmap(player_spritesheet);
@@ -291,3 +256,116 @@ int main(int argc, char **argv){
  
 	return 0;
 }
+
+
+//*********************
+// Function will start allegro and return a functional display pointer, or null pointer(if failed)
+// - al_init()
+// - al_init_image_addon()
+// - al_install_keyboard()
+// - al_create_display(width, height)
+//
+//*********************
+
+ALLEGRO_DISPLAY* startAllegro(int width0, int height0){
+	
+	//initialize allegro
+	if(!al_init()) {
+		al_show_native_message_box(NULL, NULL, NULL,
+			"failed to initialize allegro!", NULL, NULL);
+		return NULL;
+	}
+
+	//initialize image addon
+	if (!al_init_image_addon()){
+		al_show_native_message_box(NULL, NULL, NULL,
+			"failed to initialize images!\n", NULL, NULL);
+		return NULL;
+	}
+
+	//install keyboard
+	if (!al_install_keyboard()){
+		al_show_native_message_box(NULL, NULL, NULL,
+			"failed to install keyboard!\n", NULL, NULL);
+		return NULL;
+	}
+
+	//setup display
+	ALLEGRO_DISPLAY *display = NULL;
+
+	display = al_create_display(width0, height0);
+	if(!display) {
+		al_show_native_message_box(NULL, NULL, NULL,
+			"failed to create display!\n", NULL, NULL);
+		return NULL;
+	}
+ 
+	//display nuetral black screen immediately
+	al_clear_to_color(al_map_rgb(0,0,0));
+	al_flip_display();	
+	return display;
+}
+
+//********************
+// Catch all function to store a key as pressed
+//
+//********************
+
+void keyDownEvents(ALLEGRO_EVENT ev0){
+
+	switch(ev0.keyboard.keycode){
+
+		/*
+			
+		bool keys[3]
+
+		[0] - RIGHT
+		[1] - LEFT
+		[2] - SPACE
+				
+		*/
+
+	case ALLEGRO_KEY_RIGHT:
+		keys[RIGHT] = true;
+		break;
+			
+	case ALLEGRO_KEY_LEFT:
+		keys[LEFT] = true;
+		break;
+
+	case ALLEGRO_KEY_SPACE:
+		keys[SPACE] = true;
+		break;
+
+	}
+}
+
+//********************
+//Catch-all fucntion to store a key as not pressed
+//
+//********************
+
+void keyUpEvents(ALLEGRO_EVENT ev0){
+
+	switch(ev0.keyboard.keycode){
+
+	case ALLEGRO_KEY_RIGHT:
+		keys[RIGHT] = false;
+		break;
+
+	case ALLEGRO_KEY_LEFT:
+		keys[LEFT] = false;
+		break;
+
+	case ALLEGRO_KEY_SPACE:
+		keys[SPACE] = false;
+		break;
+
+	case ALLEGRO_KEY_ESCAPE:
+		done = true;
+		break;
+	}
+}
+
+
+

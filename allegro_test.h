@@ -23,5 +23,26 @@ enum{
 };
 
 
+//GLOBAL VARIABLES
+//***************************
+bool done;
+bool display_changed = true;
+
+int laser_cooldown = 0;
+
+//player's ship
+ship player;
+	
+//player's lasers
+vector<laser> player_lasers;
+
+//array for all keys used in game
+bool keys[3];
+
+//****************************
 
 
+ALLEGRO_DISPLAY* startAllegro(int width0, int height0);
+
+void keyDownEvents(ALLEGRO_EVENT ev0);
+void keyUpEvents(ALLEGRO_EVENT ev0);
