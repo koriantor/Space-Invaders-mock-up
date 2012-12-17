@@ -1,3 +1,11 @@
+//*************************************************************************
+//
+// This file contains all the global variables and functions for the game
+// 
+//
+//************************************************************************
+
+
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_native_dialog.h>
 #include <allegro5/allegro_image.h>
@@ -5,10 +13,14 @@
 #include "Ship.h"
 #include "Laser.h"
 
+#pragma once
+
 using namespace std;
 
+
+//************************
 //GLOBAL CONSTANTS
-//****************
+//************************
 
 //dispaly values
 #define WIDTH 720
@@ -29,15 +41,19 @@ enum{
 };
 
 
-//GLOBAL VARIABLES
+
+
+//***************************
+// GLOBAL VARIABLES
 //***************************
 bool done;
-bool display_changed = true;
+bool display_changed;
 
-int laser_cooldown = 0;
+int laser_cooldown;
 
 //player's ship
 ship player;
+ALLEGRO_BITMAP* player_spritesheet;
 	
 //player's lasers
 vector<laser> player_lasers;
@@ -45,14 +61,24 @@ vector<laser> player_lasers;
 //array for all keys used in game
 bool keys[3];
 
-//****************************
 
 
+
+
+//********************************
+// GLOBAL FUNCTIONS
+//********************************
 ALLEGRO_DISPLAY* startAllegro(int width0, int height0);
+
+void executeEvent(ALLEGRO_EVENT ev0);
 
 void keyDownEvents(ALLEGRO_EVENT ev0);
 void keyUpEvents(ALLEGRO_EVENT ev0);
+void timerEvent();
 
+// Event for every key
 void rightKeyEvents();
 void leftKeyEvents();
 void spaceKeyEvents();
+
+//*******************************
