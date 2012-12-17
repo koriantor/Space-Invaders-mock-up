@@ -68,7 +68,11 @@ bool keys[3];
 //********************************
 // GLOBAL FUNCTIONS
 //********************************
-ALLEGRO_DISPLAY* startAllegro(int width0, int height0);
+
+// Allegro macro functions
+//ALLEGRO_DISPLAY* startAllegro(int width0, int height0);
+bool startAllegro ( int width0, int height0, ALLEGRO_DISPLAY** display0, ALLEGRO_EVENT_QUEUE** event_queue0, ALLEGRO_TIMER** timer0);
+ALLEGRO_EVENT_QUEUE* startEventQueue();
 
 void executeEvent(ALLEGRO_EVENT ev0);
 
