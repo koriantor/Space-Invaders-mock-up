@@ -1,31 +1,22 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
+#include "Sprite.h"
 
 #pragma once
 
-class laser{
+class laser : public Sprite{
 private:
-	int spriteX;
-	int spriteY;
-	int width;
-	int height;
-	int posX;
-	int posY;
-	int speedX;
-	int speedY;
+	//hitbox variables
+	int boundX;
+	int boundY;
 	
 public:
 	laser();
-	laser(int spriteX0, int spriteY0, int width0, int height0, int posX0, int posY0, int speedX0, int speedY0);
-	
-	void move();
 
-	int getSpriteX();
-	int getSpriteY();
-	int getPosX();
-	int getPosY();
-	int getHeight();
-	int getWidth();
+	laser (ALLEGRO_BITMAP* spritesheet0, int COLUMNS0, int MAX_FRAMES0, int animationDelay0,
+			int frameWidth0, int frameHeight0, int x0, int y0, int dx0, int dy0, int boundX0, int boundY0);
+	
+
 	
 	~laser();
 

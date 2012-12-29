@@ -9,21 +9,11 @@ int main(int argc, char **argv){
 	//GLOBAL VARIABLE DECLARATIONS
 	//****************************************
 	done = false;
-	display_changed = true;
+	render = true;
 
 	laser_cooldown = 0;
 
-
-	//**player ship information
-	player.spriteX = 0;
-	player.spriteY = 0;
-	player.width = 48;
-	player.height = 48;
-	player.posX = WIDTH/2 - player.width/2;
-	player.posY = HEIGHT - player.height;
-	player.speedX = 5;
-	//**end player ship
-	
+		
 
 	//setup keyboard (with 3 keys for game)
 	for (int i = 0; i < 3; i++){
@@ -55,16 +45,23 @@ int main(int argc, char **argv){
 
 	
 
-	//MASTER SPRITE SHEET
-	player_spritesheet = al_load_bitmap("player_spritesheet.png");
-	al_convert_mask_to_alpha(player_spritesheet, al_map_rgb(255,0,255));
+	//SPRITE SHEET
+	player_ship = al_load_bitmap("player_ship.png");
+	al_convert_mask_to_alpha(player_ship, al_map_rgb(255,0,255));
 
-	//draw player ship in starting position
-	al_draw_bitmap_region(player_spritesheet, player.spriteX, player.spriteY,
-						 player.width, player.height, player.posX, player.posY, 0);
+	player_laser = al_load_bitmap("player_laser.png");
+	al_convert_mask_to_alpha(player_laser, al_map_rgb(255,0,255));
+
+	// create player ship object, then draw
+	player = ship(player_ship, 4, 4, 30, 48, 48, WIDTH/2 - 24, HEIGHT - 48, 0, 0, 2, 2);
+	player.draw();
+
+	
+
+	
 
 	al_flip_display();
-	display_changed = false;
+	render = false;
 
 
 
@@ -95,7 +92,8 @@ int main(int argc, char **argv){
 
 
 	// Clean up allegro objects
-	al_destroy_bitmap(player_spritesheet);
+	al_destroy_bitmap(player_ship);
+	al_destroy_bitmap(player_laser);
 	al_destroy_timer(timer);
 	al_destroy_event_queue(event_queue);
 	al_destroy_display(display);
@@ -272,6 +270,12 @@ void keyUpEvents(ALLEGRO_EVENT ev0){
 //********************
 
 void timerEvent(){
+	//**********************************
+	//Update the metadata for the display 
+	//
+	//**********************************
+
+
 	//check player ship movement keys
 	if (keys[RIGHT]){
 		rightKeyEvents();
@@ -293,27 +297,39 @@ void timerEvent(){
 
 	if (!player_lasers.empty()){
 		//if there are still lasers on screen, then update them on the display
-		display_changed = true;
+		render = true;
 	}
+
+	
+	//NEW CODE : animate and move player ship
+	if (player.stepFrame()){
+		render = true;
+	}
+
 		
 
 
+	//*******************************************************
+	// Refreshing the display (only refresh if render needed)
+	//
+	//*******************************************************
 
-	//handling the display (only refresh if display has changed)
-	if (display_changed){
+	if (render){
 
 		//clear display
 		al_clear_to_color(al_map_rgb(0,0,0));
 	
+
 		//draw lasers and destroy old lasers			
 		for (size_t i = 0; i < player_lasers.size(); i++){
-			if (player_lasers[i].getPosY() > 0 - player_lasers[i].getHeight()){
+
+			if (player_lasers[i].getY() > 0 - player_lasers[i].getFrameHeight()){
 					
 				//draw laser sprite from data defined in laser object
-				al_draw_bitmap_region ( player_spritesheet, 
-									 player_lasers[i].getSpriteX(), player_lasers[i].getSpriteY(),
-									 player_lasers[i].getWidth(), player_lasers[i].getHeight(), 
-									 player_lasers[i].getPosX(), player_lasers[i].getPosY(),    0);
+				player_lasers[i].draw();
+
+				//step the lasers by one and move them
+				player_lasers[i].stepFrame();
 				player_lasers[i].move();
 						
 						
@@ -322,21 +338,16 @@ void timerEvent(){
 				i--;
 			}
 		}
+
+		
+		// draw ship
+		player.draw();
 	
-
-
-		//draw ship from sprite sheet from data in ship object
-		//(maybe animate later?)
-		al_draw_bitmap_region ( player_spritesheet, 
-							 player.spriteX, player.spriteY, 
-							 player.width, player.height,
-							 player.posX, player.posY,      0);
-				
-
+		
 
 
 		//display ready to flip
-		display_changed = false;
+		render = false;
 		al_flip_display();
 	}  
 }
@@ -348,9 +359,10 @@ void timerEvent(){
 //********************
 
 void rightKeyEvents(){
-	if (player.posX <= 720 - player.width - player.speedX){
-		player.posX += player.speedX;
-		display_changed = true;
+	player.setDX(PLAYER_SPEED);
+	if (player.getX() <= 720 - player.getFrameWidth() - PLAYER_SPEED){
+		player.move();
+		render = true;
 	}
 }
 
@@ -360,9 +372,10 @@ void rightKeyEvents(){
 //********************
 
 void leftKeyEvents(){
-	if (player.posX >= player.speedX){
-		player.posX -= player.speedX;
-		display_changed = true;
+	player.setDX(-PLAYER_SPEED);
+	if (player.getX() >= PLAYER_SPEED){
+		player.move();
+		render = true;
 	}
 }
 
@@ -376,7 +389,8 @@ void spaceKeyEvents(){
 	if (laser_cooldown == 0){
 
 		//make new laser
-		player_lasers.push_back(laser(48, 0, 48, 48, player.posX, player.posY - LASER_OFFSET, 0, LASER_SPEED));
+		player_lasers.push_back(laser(player_laser, 2, 2, 30, 48, 48, player.getX(), player.getY(), 0, LASER_SPEED, 2, 2));
+		
 
 	 
 		//reset coodlown

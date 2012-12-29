@@ -28,8 +28,11 @@ using namespace std;
 
 #define FPS 60.0
 
+//PLAYER VALUES
+#define PLAYER_SPEED 5
+
 //laser values
-#define LASER_SPEED -10
+#define LASER_SPEED -5
 #define LASER_COOLDOWN 15
 
 #define LASER_OFFSET 10
@@ -47,16 +50,17 @@ enum{
 // GLOBAL VARIABLES
 //***************************
 bool done;
-bool display_changed;
+bool render;
 
 int laser_cooldown;
 
 //player's ship
 ship player;
-ALLEGRO_BITMAP* player_spritesheet;
+ALLEGRO_BITMAP* player_ship;
 	
 //player's lasers
 vector<laser> player_lasers;
+ALLEGRO_BITMAP* player_laser;
 
 //array for all keys used in game
 bool keys[3];
@@ -70,7 +74,6 @@ bool keys[3];
 //********************************
 
 // Allegro macro functions
-//ALLEGRO_DISPLAY* startAllegro(int width0, int height0);
 bool startAllegro ( int width0, int height0, ALLEGRO_DISPLAY** display0, ALLEGRO_EVENT_QUEUE** event_queue0, ALLEGRO_TIMER** timer0);
 ALLEGRO_EVENT_QUEUE* startEventQueue();
 

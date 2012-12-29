@@ -3,30 +3,23 @@
 
 
 laser::laser(){	
+	Sprite();
 }
 
-laser::laser(int spriteX0, int spriteY0, int width0, int height0, int posX0, int posY0, int speedX0, int speedY0){
-	spriteX = spriteX0;
-	spriteY = spriteY0;
-	width = width0;
-	height = height0;
-	posX = posX0;
-	posY = posY0;
-	speedX = speedX0;
-	speedY = speedY0;
+laser::laser( ALLEGRO_BITMAP* spritesheet0, int COLUMNS0, int MAX_FRAMES0, int animationDelay0, 
+		int frameWidth0, int frameHeight0, int x0, int y0, int dx0, int dy0, int boundX0, int boundY0)
+
+	: Sprite (spritesheet0, COLUMNS0, MAX_FRAMES0, animationDelay0,
+		frameWidth0, frameHeight0, x0, y0, dx0, dy0)
+{
+
+	boundX = boundX0;
+	boundY = boundY0;
+	
+
 }
 
-void laser::move(){
-	posX += speedX;
-	posY += speedY;
-}
 
-int laser::getSpriteX(){return spriteX;}
-int laser::getSpriteY(){return spriteY;}
-int laser::getPosX(){return posX;}
-int laser::getPosY(){return posY;}
-int laser::getHeight(){return height;}
-int laser::getWidth(){return width;}
 	
 laser::~laser(){
 }
