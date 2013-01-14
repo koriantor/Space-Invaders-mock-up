@@ -1,127 +1,67 @@
-#include <allegro5/allegro.h>
-#include <allegro5/allegro_native_dialog.h>
-#include <allegro5/allegro_image.h>
-#include <vector>
-#include "Ship.h"
-#include "Laser.h"
-
-using namespace std;
+#include "allegro_test.h"
 
 
-
-
-enum{
-	RIGHT,
-	LEFT,
-	SPACE
-};
 
  
 int main(int argc, char **argv){
 
 
-	//**GAME SPECIFIC VARIABLES**
-	const int WIDTH = 720;
-	const int HEIGHT = 480;
+	//GLOBAL VARIABLE DECLARATIONS
+	//****************************************
+	done = false;
+	render = true;
 
-	bool done = false;
-	bool display_changed = true;
-	double FPS = 60.0;
+	laser_cooldown = 0;
 
-	const int LASER_SPEED = 0;
-	const int LASER_COOLDOWN = 15;
-	int laser_cooldown = 0;
-	laser* laser0;
+		
+
+	//setup keyboard (with 3 keys for game)
+	for (int i = 0; i < 3; i++){
+		keys[i] = false;
+	}
+	//***************************************
 
 
-	//player's ship
-	ship player;
-	//**player ship information
-	player.spriteX = 0;
-	player.spriteY = 0;
-	player.width = 48;
-	player.height = 48;
-	player.posX = WIDTH/2 - player.width/2;
-	player.posY = HEIGHT - player.height;
-	player.speedX = 5;
-	//**end player ship
+
+	//**ALLEGRO RELATED CODE**
 	
+	ALLEGRO_DISPLAY* display = NULL;
+	ALLEGRO_EVENT_QUEUE* event_queue = NULL;
+	ALLEGRO_TIMER* timer = NULL;
 
-
-	//player's lasers
-	vector<laser> player_lasers;
-	//**end player lasers
-
-
-
-
-
-	//**ALLEGRO SPECIFIC CODE**
-	
-	if(!al_init()) {
-		al_show_native_message_box(NULL, NULL, NULL,
-			"failed to initialize allegro!", NULL, NULL);
+	if (!startAllegro(WIDTH, HEIGHT, &display, &event_queue, &timer)){
 		return -1;
 	}
- 
-	//setup display
-	ALLEGRO_DISPLAY *display = NULL;
 
-	display = al_create_display(WIDTH, HEIGHT);
-	if(!display) {
-		al_show_native_message_box(NULL, NULL, NULL,
-			"failed to create display!\n", NULL, NULL);
-		return -1;
-	}
- 
-	//display nuetral black screen immediately
-	al_clear_to_color(al_map_rgb(0,0,0));
-	al_flip_display();
-
-
-
-
-	//setup keyboard
-	al_install_keyboard();
-	bool keys[3] = {false, false, false};
-
-
-
-
-	//register events
-	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
-	event_queue = al_create_event_queue();
-
+	
+	//REGISTER EVENTS
+	
 	//keyboard is an event source
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
 
 	//timer is an event source
-	ALLEGRO_TIMER *timer = NULL;
-	timer = al_create_timer(1.0 / FPS);
 	al_register_event_source(event_queue, al_get_timer_event_source(timer));
 
 
-
-
-	//initialize image addon and load sprites
-	al_init_image_addon();
-
-	//player's ship created
-	ALLEGRO_BITMAP* player_spritesheet = al_load_bitmap("player_spritesheet.png");
 	
-	al_convert_mask_to_alpha(player_spritesheet, al_map_rgb(255,0,255));
 
-	//draw ship
-	al_draw_bitmap_region(player_spritesheet, player.spriteX, player.spriteY,
-						 player.width, player.height, player.posX, player.posY, 0);
+	//SPRITE SHEET
+	player_ship = al_load_bitmap("player_ship.png");
+	al_convert_mask_to_alpha(player_ship, al_map_rgb(255,0,255));
+
+	player_laser = al_load_bitmap("player_laser.png");
+	al_convert_mask_to_alpha(player_laser, al_map_rgb(255,0,255));
+
+	// create player ship object, then draw
+	player = ship(player_ship, 4, 4, 30, 48, 48, WIDTH/2 - 24, HEIGHT - 48, 0, 0, 2, 2);
+	player.draw();
+
+	
+
+	
 
 	al_flip_display();
-	display_changed = false;
-
-
-
-
-
+	render = false;
 
 
 
@@ -139,175 +79,322 @@ int main(int argc, char **argv){
 		ALLEGRO_EVENT ev;
 		al_wait_for_event(event_queue, &ev);
 
-		//keyboard events
+		executeEvent(ev);
 
-		//key down events
-		if (ev.type == ALLEGRO_EVENT_KEY_DOWN){
-
-			switch(ev.keyboard.keycode){
-
-				/*
-				
-				bool keys[3]
-
-				[0] - RIGHT
-				[1] - LEFT
-				[2] - SPACE
-				
-				*/
-
-			case ALLEGRO_KEY_RIGHT:
-				keys[RIGHT] = true;
-				break;
-			
-			case ALLEGRO_KEY_LEFT:
-				keys[LEFT] = true;
-				break;
-
-			case ALLEGRO_KEY_SPACE:
-				keys[SPACE] = true;
-				break;
-
-			}
-
-		}
-		//key up events
-		else if (ev.type == ALLEGRO_EVENT_KEY_UP){
-
-			switch(ev.keyboard.keycode){
-
-			case ALLEGRO_KEY_RIGHT:
-				keys[RIGHT] = false;
-				break;
-
-			case ALLEGRO_KEY_LEFT:
-				keys[LEFT] = false;
-				break;
-
-			case ALLEGRO_KEY_SPACE:
-				keys[SPACE] = false;
-				break;
-
-			case ALLEGRO_KEY_ESCAPE:
-				done = true;
-				break;
-			}
-
-		}
-
-
-		//timer events(frame refresh)
-		else{
-			//check player ship movement
-			if (keys[RIGHT]){
-				if (player.posX <= 720 - player.width - player.speedX){
-					player.posX += player.speedX;
-					display_changed = true;
-				}
-			}
-
-			if (keys[LEFT]){
-				if (player.posX >= player.speedX){
-					player.posX -= player.speedX;
-					display_changed = true;
-				}
-			}
-			
-			//manage player lasers
-			if (keys[SPACE]){
-				if (laser_cooldown == 0){
-					//make new laser
-					const int LASER_OFFSET = 10;
-					
-	
-					/*OLD CODE
-					laser0 = new laser(player.posX, player.posY - LASER_OFFSET, 0, LASER_SPEED, "player_laser.png");
-					//store laser
-					player_lasers.push_back(*laser0);
-					//*/
-	
-					player_lasers.push_back(laser(48, 0, 48, 48, player.posX, player.posY - LASER_OFFSET, 0, LASER_SPEED));
-	
-	
-					//reset coodlown
-					laser_cooldown = LASER_COOLDOWN;
-				}
-			}
-			if (laser_cooldown > 0){
-				//decrement cooldown
-				laser_cooldown--;
-			}
-			if (!player_lasers.empty()){
-				//if there are still lasers on screen, then update them on the display
-				display_changed = true;
-			}
-			
-
-
-
-			//handling the display (only refresh if display has changed)
-			if (display_changed){
-				//clear display
-				al_clear_to_color(al_map_rgb(0,0,0));
-	
-				//draw lasers and destroy old lasers			
-				for (size_t i = 0; i < player_lasers.size(); i++){
-					if (player_lasers[i].getPosY() > 0 - player_lasers[i].getHeight()){
-						
-						/* OLD CODE
-						ALLEGRO_BITMAP* image0 = al_load_bitmap( player_lasers[i].getFilename() );
-						al_convert_mask_to_alpha(image0, al_map_rgb(255,0,255));
-						//*/
-	
-	
-						//draw sprite from data defined in laser object
-						al_draw_bitmap_region ( player_spritesheet, 
-											 player_lasers[i].getSpriteX(), player_lasers[i].getSpriteY(),
-											 player_lasers[i].getWidth(), player_lasers[i].getHeight(), 
-											 player_lasers[i].getPosX(), player_lasers[i].getPosY(),    0);
-						player_lasers[i].move();
-						
-						/* OLD CODE
-						//Destroy the bitmap before leaving the context
-						al_destroy_bitmap(image0);
-						//*/
-					}else{
-						player_lasers.erase(player_lasers.begin() + i);
-						i--;
-					}
-				}
-	
-				//draw ship from sprite sheet from data in ship object
-				//(maybe animate later?)
-				al_draw_bitmap_region ( player_spritesheet, 
-									 player.spriteX, player.spriteY, 
-									 player.width, player.height,
-									 player.posX, player.posY,      0);
-				
-
-
-
-
-
-				//display ready to flip
-				display_changed = false;
-				al_flip_display();
-			}
-		}   
 	}
 
-	//destroy all lasers
-	//*
+
+	// Destroy all lasers
 	while(!player_lasers.empty()){
 		//al_destroy_bitmap(player_lasers[0].image);
 		player_lasers.erase(player_lasers.begin());
-	}//*/
+	}
 
 
-	al_destroy_bitmap(player_spritesheet);
+	// Clean up allegro objects
+	al_destroy_bitmap(player_ship);
+	al_destroy_bitmap(player_laser);
 	al_destroy_timer(timer);
 	al_destroy_event_queue(event_queue);
 	al_destroy_display(display);
  
 	return 0;
 }
+
+
+//*********************
+// Function will start allegro and return a bool as to whether it successfully initialized everything
+// - al_init()
+// - al_init_image_addon()
+// - al_install_keyboard()
+// - al_create_display(width, height)
+// - al_create_event_queue()
+// - al_create_timer(1.0/FPS)
+//
+//*********************
+
+bool startAllegro ( int width0, int height0, ALLEGRO_DISPLAY** display0, ALLEGRO_EVENT_QUEUE** event_queue0, ALLEGRO_TIMER** timer0){
+	
+	//initialize allegro
+	if(!al_init()) {
+		al_show_native_message_box(NULL, NULL, NULL,
+			"failed to initialize allegro!", NULL, NULL);
+		return NULL;
+	}
+
+	//initialize image addon
+	if (!al_init_image_addon()){
+		al_show_native_message_box(NULL, NULL, NULL,
+			"failed to initialize images!\n", NULL, NULL);
+		return NULL;
+	}
+
+	//install keyboard
+	if (!al_install_keyboard()){
+		al_show_native_message_box(NULL, NULL, NULL,
+			"failed to install keyboard!\n", NULL, NULL);
+		return NULL;
+	}
+
+
+	//try to make display
+	*display0 = al_create_display(width0, height0);
+	if(display0 == NULL) {
+		al_show_native_message_box(NULL, NULL, NULL,
+			"failed to create display!\n", NULL, NULL);
+
+		return false;
+	} 
+
+
+	//try to make event queue
+	*event_queue0 = al_create_event_queue();
+	if(event_queue0 == NULL) {
+		al_show_native_message_box(NULL, NULL, NULL,
+			"failed to create event queue!\n", NULL, NULL);
+
+		al_destroy_display(*display0);
+		return false;
+	}
+
+	//try to make timer
+	*timer0 = al_create_timer(1.0 / FPS);
+	if(timer0 == NULL) {
+		al_show_native_message_box(NULL, NULL, NULL,
+			"failed to create timer!\n", NULL, NULL);
+
+		al_destroy_display(*display0);
+		al_destroy_event_queue(*event_queue0);
+		return false;
+	}
+
+	//display nuetral black screen immediately
+	al_clear_to_color(al_map_rgb(0,0,0));
+	al_flip_display();
+
+	return true;
+
+}
+
+
+//********************
+//Function will call the appropriate function to hadle the event handed to it
+//
+//********************
+
+void executeEvent(ALLEGRO_EVENT ev0){
+	
+	//KEYBOARD EVENTS
+
+	//key down events
+	if (ev0.type == ALLEGRO_EVENT_KEY_DOWN){
+		keyDownEvents(ev0);
+	}
+
+	//key up events
+	else if (ev0.type == ALLEGRO_EVENT_KEY_UP){
+		keyUpEvents(ev0);
+	}
+
+	//timer events(frame refresh)
+	else if (ev0.type == ALLEGRO_EVENT_TIMER){
+		timerEvent();
+	}
+}
+
+
+//********************
+// Catch all function to store a key as pressed
+//
+//********************
+
+void keyDownEvents(ALLEGRO_EVENT ev0){
+
+	switch(ev0.keyboard.keycode){
+
+		//*****************
+		//
+		// bool keys[3]
+		//
+		// [0] - RIGHT
+		// [1] - LEFT
+		// [2] - SPACE
+		//		
+		//*****************
+
+	case ALLEGRO_KEY_RIGHT:
+		keys[RIGHT] = true;
+		break;
+			
+	case ALLEGRO_KEY_LEFT:
+		keys[LEFT] = true;
+		break;
+
+	case ALLEGRO_KEY_SPACE:
+		keys[SPACE] = true;
+		break;
+
+	}
+}
+
+//********************
+// Catch-all fucntion to store a key as not pressed
+//
+//********************
+
+void keyUpEvents(ALLEGRO_EVENT ev0){
+
+	switch(ev0.keyboard.keycode){
+
+	case ALLEGRO_KEY_RIGHT:
+		keys[RIGHT] = false;
+		break;
+
+	case ALLEGRO_KEY_LEFT:
+		keys[LEFT] = false;
+		break;
+
+	case ALLEGRO_KEY_SPACE:
+		keys[SPACE] = false;
+		break;
+
+	case ALLEGRO_KEY_ESCAPE:
+		done = true;
+		break;
+	}
+}
+
+//********************
+// Timer/Screen update function
+//
+//********************
+
+void timerEvent(){
+	//**********************************
+	//Update the metadata for the display 
+	//
+	//**********************************
+
+
+	//check player ship movement keys
+	if (keys[RIGHT]){
+		rightKeyEvents();
+	}
+
+	if (keys[LEFT]){
+		leftKeyEvents();
+	}
+			
+	//manage fire laser key
+	if (keys[SPACE]){
+		spaceKeyEvents();
+	}
+
+	if (laser_cooldown > 0){
+		//decrement cooldown
+		laser_cooldown--;
+	}
+
+	if (!player_lasers.empty()){
+		//if there are still lasers on screen, then update them on the display
+		render = true;
+	}
+
+	
+	//NEW CODE : animate and move player ship
+	if (player.stepFrame()){
+		render = true;
+	}
+
+		
+
+
+	//*******************************************************
+	// Refreshing the display (only refresh if render needed)
+	//
+	//*******************************************************
+
+	if (render){
+
+		//clear display
+		al_clear_to_color(al_map_rgb(0,0,0));
+	
+
+		//draw lasers and destroy old lasers			
+		for (size_t i = 0; i < player_lasers.size(); i++){
+
+			if (player_lasers[i].getY() > 0 - player_lasers[i].getFrameHeight()){
+					
+				//draw laser sprite from data defined in laser object
+				player_lasers[i].draw();
+
+				//step the lasers by one and move them
+				player_lasers[i].stepFrame();
+				player_lasers[i].move();
+						
+						
+			}else{
+				player_lasers.erase(player_lasers.begin() + i);
+				i--;
+			}
+		}
+
+		
+		// draw ship
+		player.draw();
+	
+		
+
+
+		//display ready to flip
+		render = false;
+		al_flip_display();
+	}  
+}
+
+
+//********************
+//Perform all calculations related to the right arrow key pressed
+//
+//********************
+
+void rightKeyEvents(){
+	player.setDX(PLAYER_SPEED);
+	if (player.getX() <= 720 - player.getFrameWidth() - PLAYER_SPEED){
+		player.move();
+		render = true;
+	}
+}
+
+//********************
+//Perform all calculations related to the Left Arrow key pressed
+//
+//********************
+
+void leftKeyEvents(){
+	player.setDX(-PLAYER_SPEED);
+	if (player.getX() >= PLAYER_SPEED){
+		player.move();
+		render = true;
+	}
+}
+
+//********************
+//Perform all calculations related to the Space key pressed
+//
+//********************
+
+void spaceKeyEvents(){
+	//if able to fire laser
+	if (laser_cooldown == 0){
+
+		//make new laser
+		player_lasers.push_back(laser(player_laser, 2, 2, 30, 48, 48, player.getX(), player.getY(), 0, LASER_SPEED, 2, 2));
+		
+
+	 
+		//reset coodlown
+		laser_cooldown = LASER_COOLDOWN;
+	}
+}
+
