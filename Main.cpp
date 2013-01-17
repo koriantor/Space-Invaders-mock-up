@@ -6,21 +6,14 @@ int main (int argc, char** argv){
 
 	//GLOBAL VARIABLE DECLARATIONS
 	//****************************************
-	done = false;
-	render = true;
 
 	//initialize all key states to false
-	for (int i = 0; i < 6; i++){
+	for (int i = 0; i < KEYS_SIZE; i++){
 		keys[i] = false;
 	}
-
-
-	//variable to control the title screen phase
-	title_count = 0;
-
-
+	
 	//variable to store current state
-	current_state = -1;
+	current_state = TITLE;
 
 
 	//****************************************
@@ -54,61 +47,17 @@ int main (int argc, char** argv){
 
 
 
-	// SPRITE SHEETS
-	//*****************************************************************
-	title = al_load_bitmap("title.png");
-	//al_convert_mask_to_alpha(title, al_map_rgb(255, 0, 255));
-
-	title_ship = al_load_bitmap("title_ship.png");
-	al_convert_mask_to_alpha(title_ship, al_map_rgb(255, 0, 255));
-
-	//*****************************************************************
-
-	
-	// DRAW FIRST FRAME 
-	//*****************************************************************
-	al_draw_bitmap(title, TITLE_X, TITLE_Y, 0);
-	
-	Title_Ship = Sprite(title_ship, 4, 4, 20, 48, 48, SHIP_X, SHIP_Y, 0, 0);
-	Title_Ship.draw();
-
-	al_flip_display();
-	render = false;
-
-	//*****************************************************************
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	//start timer right before loop
 	al_start_timer(timer);
 
 
 	//**GAME LOOP****GAME LOOP****GAME LOOP**
-	while(!done){
-		ALLEGRO_EVENT ev;
-		al_wait_for_event(event_queue, &ev);
-
-		executeEvent(ev);
+	while(current_state != EXIT){
+		nextState();
 
 	}
 
-
-
-	al_destroy_bitmap(title);
-	al_destroy_bitmap(title_ship);
 	
 	al_destroy_timer(timer);
 	al_destroy_event_queue(event_queue);
@@ -193,212 +142,43 @@ bool startAllegro ( int width0, int height0, ALLEGRO_DISPLAY** display0, ALLEGRO
 }
 
 
+
+
+
 //********************
-//Function will call the appropriate function to hadle the event handed to it
+// Game state switching
 //
 //********************
 
-void executeEvent(ALLEGRO_EVENT ev0){
-	
-	//key down events
-	if (ev0.type == ALLEGRO_EVENT_KEY_DOWN){
-		keyDownEvents(ev0);
-	}
+void nextState(){
 
-	//key up events
-	else if (ev0.type == ALLEGRO_EVENT_KEY_UP){
-		keyUpEvents(ev0);
-	}
+	State* state;
+	switch(current_state){
 
-	//timer events(frame refresh)
-	else if (ev0.type == ALLEGRO_EVENT_TIMER){
-		timerEvent();
-	}
-}
-
-
-//********************
-// Catch all function to store a key as pressed
-//
-//********************
-
-void keyDownEvents(ALLEGRO_EVENT ev0){
-
-	switch(ev0.keyboard.keycode){
-
-		//*****************
-		//
-		// enum KEYS
-		//
-		// [0] - UP
-		// [1] - DOWN
-		// [2] - RIGHT
-		// [3] - LEFT
-		// [4] - SPACE
-		// [5] - ENTER
-		//
-		//*****************
-
-	case ALLEGRO_KEY_UP:
-		keys[UP] = true;
-		break;
-			
-	case ALLEGRO_KEY_DOWN:
-		keys[DOWN] = true;
-		break;
-			
-	case ALLEGRO_KEY_RIGHT:
-		keys[RIGHT] = true;
-		break;
-			
-	case ALLEGRO_KEY_LEFT:
-		keys[LEFT] = true;
+	case TITLE:
+		state = new Title(keys, event_queue);
 		break;
 
-	case ALLEGRO_KEY_SPACE:
-		keys[SPACE] = true;
+	case MAIN_MENU:
+		state = new MainMenu(keys, event_queue);
 		break;
 
-	case ALLEGRO_KEY_ENTER:
-		keys[ENTER] = true;
-		break;
-			
-	}
-}
-
-//********************
-// Catch-all fucntion to store a key as not pressed
-//
-//********************
-
-void keyUpEvents(ALLEGRO_EVENT ev0){
-
-	switch(ev0.keyboard.keycode){
-
-		//*****************
-		//
-		// enum KEYS
-		//
-		// [0] - UP
-		// [1] - DOWN
-		// [2] - RIGHT
-		// [3] - LEFT
-		// [4] - SPACE
-		// [5] - ENTER
-		//
-		//*****************
-
-	case ALLEGRO_KEY_UP:
-		keys[UP] = false;
-		break;
-			
-	case ALLEGRO_KEY_DOWN:
-		keys[DOWN] = false;
-		break;
-			
-	case ALLEGRO_KEY_RIGHT:
-		keys[RIGHT] = false;
+	case GAME:
+		current_state = gameState(keys, &event_queue);
 		break;
 
-	case ALLEGRO_KEY_LEFT:
-		keys[LEFT] = false;
+	case OPTIONS_MENU://***
 		break;
 
-	case ALLEGRO_KEY_SPACE:
-		keys[SPACE] = false;
-		break;
-
-	case ALLEGRO_KEY_ENTER:
-		keys[ENTER] = false;
-		break;
-
-	case ALLEGRO_KEY_ESCAPE:
-		done = true;
+	//exit the program
+	case EXIT:
+		//should not ever reach this case, becase the state handling loop exts...
 		break;
 	}
-}
 
-//********************
-// Timer/Screen update function
-//
-//********************
-
-void timerEvent(){
-	
-	//*******************************************************
-	// Update display's Metadata
-	//
-	//*******************************************************
-
-	//display title screen
-	if (title_count <= TITLE_FINISH){
-		
-		//step the ship sprite animation, and render if changed
-		if (Title_Ship.stepFrame()) {
-			render = true;
-		}
-
-		title_count++;
-	} 
-
-	//Game state switching***********************************************************
-	else {
-		if (current_state == -1){
-			current_state = MAIN_MENU;
-		}
-
-		switch(current_state){
-
-		//enter Main menu state
-		case MAIN_MENU:
-			current_state = mainMenuState(keys, &event_queue);
-			break;
-
-		//enter the game state
-		case GAME:
-			current_state = gameState(keys, &event_queue);
-			break;
-
-		//enter Options menu state
-		case OPTIONS_MENU:
-
-			break;
-
-		//exiting the game state
-		case EXIT:
-			done = true;
-			break;
-
-		}
-
-
-		//done = true;
-
-
-
+	if (state != NULL){
+		current_state = state->StateFunction();
+		delete state;
 	}
 
-
-
-	//*******************************************************
-	// Refreshing the display (only refresh if render needed)
-	//
-	//*******************************************************
-
-	if (render){
-
-		//clear display
-		al_clear_to_color(al_map_rgb(0,0,0));
-	
-
-		//refresh the title screen
-		al_draw_bitmap(title, TITLE_X, TITLE_Y, 0);
-		Title_Ship.draw();
-		
-
-
-		//display ready to flip
-		render = false;
-		al_flip_display();
-	}  
 }

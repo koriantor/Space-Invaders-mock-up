@@ -4,6 +4,8 @@
 //***************************
 #pragma once
 
+#include "Keys.h"
+
 //dispaly values
 #define WIDTH 720
 #define HEIGHT 480
@@ -11,17 +13,17 @@
 #define FPS 60.0
 
 
-
-enum KEYS{
-	UP,
-	DOWN,
-	RIGHT,
-	LEFT,
-	SPACE,
-	ENTER
-};
+//enum KEYS{
+//	UP,
+//	DOWN,
+//	RIGHT,
+//	LEFT,
+//	SPACE,
+//	ENTER
+//};
 
 enum STATES{
+	TITLE,
 	MAIN_MENU,
 	GAME,
 	OPTIONS_MENU,

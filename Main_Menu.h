@@ -5,6 +5,7 @@
 
 #include "sprite.h"
 #include "Constants.h"
+#include "State.h"
 
 
 
@@ -29,42 +30,86 @@
 
 
 // selection enum values corresponding to their listed location
-enum SELECTIONS{
+enum BUTTONS{
 	PLAY_BUTTON,
 	OPTIONS_BUTTON,
 	EXIT_BUTTON
 };
 
-
-
-//*************************************************
-// MAIN MENU STATE FUNCTION
-// Returns the enum value for the next state
-//
-//*************************************************
-int mainMenuState(bool* keys0, ALLEGRO_EVENT_QUEUE** event_queue0);
+//************************
 
 
 
 
-//***************************
-// MAIN MENU FUNCTIONS
-//***************************
 
 
-//functions to move the menu selection up or down
-void menuUp();
-void menuDown();
+class MainMenu:public State{
+private:
 
-//functions to advance button sprites
-void advanceButton(int selection0);
+	//***************************
+	// MAIN MENU VARIABLES
+	//***************************
+
+	//variable to store current buttton
+	int selection;
+	
+	// these bools track keep track of when the up or down keys are actually being pressed
+	bool key_up_still_pressed;
+	bool key_down_still_pressed;
+
+	
+	// SPRITES
+	//************
+	ALLEGRO_BITMAP* play_button;
+	Sprite Play_Button;
+	ALLEGRO_BITMAP* options_button;
+	Sprite Options_Button;
+	ALLEGRO_BITMAP* exit_button;
+	Sprite Exit_Button;
+
+	
+	//************************
+
+	
+public:
+
+	MainMenu();
+
+	MainMenu(bool* keys0, ALLEGRO_EVENT_QUEUE* event_queue0);
+	
+	
+	
+	//*************************************************
+	// MAIN MENU STATE FUNCTION
+	// Returns the enum value for the next state
+	//
+	//*************************************************
+	STATES StateFunction();
+
+	//********************
+	// Timer/Screen update function
+	//
+	//********************
+	void timerEvent();
 
 
-// allegro event funcitons
-void mm_executeEvent(ALLEGRO_EVENT ev0);
+	
+	//***************************
+	// MAIN MENU FUNCTIONS
+	//***************************
 
-void mm_keyDownEvents(ALLEGRO_EVENT ev0);
-void mm_keyUpEvents(ALLEGRO_EVENT ev0);
-void mm_timerEvent();
+	//functions to move the menu selection up or down
+	void moveButtons();
+	
+	void menuUp();
+	void menuDown();
 
+	//function to advance button sprites
+	void advanceButton(int selection0);
 
+	//function to convert BUTTONS to STATES
+	STATES BUTTONSToSTATES(int state0);
+
+		
+	//************************
+};

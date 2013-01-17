@@ -24,7 +24,7 @@ namespace game{
 
 
 	//int for next state
-	int next_state;
+	STATES next_state;
 }
 
 using namespace game;
@@ -35,7 +35,7 @@ using namespace game;
 
 
  
-int gameState(bool* keys0, ALLEGRO_EVENT_QUEUE** event_queue0){
+STATES gameState(bool* keys0, ALLEGRO_EVENT_QUEUE** event_queue0){
 
 
 	//GLOBAL VARIABLE DECLARATIONS
@@ -57,10 +57,10 @@ int gameState(bool* keys0, ALLEGRO_EVENT_QUEUE** event_queue0){
 
 	//SPRITE SHEETS
 	//*****************************************************************
-	player_ship = al_load_bitmap("player_ship.png");
+	player_ship = al_load_bitmap("images/player_ship.png");
 	al_convert_mask_to_alpha(player_ship, al_map_rgb(255,0,255));
 
-	player_laser = al_load_bitmap("player_laser.png");
+	player_laser = al_load_bitmap("images/player_laser.png");
 	al_convert_mask_to_alpha(player_laser, al_map_rgb(255,0,255));
 
 	//*****************************************************************
@@ -149,27 +149,27 @@ void g_keyDownEvents(ALLEGRO_EVENT ev0){
 
 
 	case ALLEGRO_KEY_UP:
-		keys[UP] = true;
+		keys[KEY_UP] = true;
 		break;
 			
 	case ALLEGRO_KEY_DOWN:
-		keys[DOWN] = true;
+		keys[KEY_DOWN] = true;
 		break;
 			
 	case ALLEGRO_KEY_RIGHT:
-		keys[RIGHT] = true;
+		keys[KEY_RIGHT] = true;
 		break;
 			
 	case ALLEGRO_KEY_LEFT:
-		keys[LEFT] = true;
+		keys[KEY_LEFT] = true;
 		break;
 
 	case ALLEGRO_KEY_ENTER:
-		keys[ENTER] = true;
+		keys[KEY_ENTER] = true;
 		break;
 			
 	case ALLEGRO_KEY_SPACE:
-		keys[SPACE] = true;
+		keys[KEY_SPACE] = true;
 		break;
 
 	}
@@ -185,27 +185,27 @@ void g_keyUpEvents(ALLEGRO_EVENT ev0){
 	switch(ev0.keyboard.keycode){
 
 	case ALLEGRO_KEY_UP:
-		keys[UP] = false;
+		keys[KEY_UP] = false;
 		break;
 
 	case ALLEGRO_KEY_DOWN:
-		keys[DOWN] = false;
+		keys[KEY_DOWN] = false;
 		break;
 
 	case ALLEGRO_KEY_RIGHT:
-		keys[RIGHT] = false;
+		keys[KEY_RIGHT] = false;
 		break;
 
 	case ALLEGRO_KEY_LEFT:
-		keys[LEFT] = false;
+		keys[KEY_LEFT] = false;
 		break;
 
 	case ALLEGRO_KEY_SPACE:
-		keys[SPACE] = false;
+		keys[KEY_SPACE] = false;
 		break;
 
 	case ALLEGRO_KEY_ENTER:
-		keys[ENTER] = false;
+		keys[KEY_ENTER] = false;
 		break;
 
 	case ALLEGRO_KEY_ESCAPE:
@@ -227,16 +227,16 @@ void g_timerEvent(){
 
 
 	//check player ship movement keys
-	if (keys[RIGHT]){
+	if (keys[KEY_RIGHT]){
 		g_rightKeyEvents();
 	}
 
-	if (keys[LEFT]){
+	if (keys[KEY_LEFT]){
 		g_leftKeyEvents();
 	}
 			
 	//manage fire laser key
-	if (keys[SPACE]){
+	if (keys[KEY_SPACE]){
 		g_spaceKeyEvents();
 	}
 

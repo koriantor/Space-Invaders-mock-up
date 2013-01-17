@@ -24,7 +24,7 @@ using namespace std;
 
 
 
-int gameState(bool* keys0, ALLEGRO_EVENT_QUEUE** event_queue0);
+STATES gameState(bool* keys0, ALLEGRO_EVENT_QUEUE** event_queue0);
 
 
 //********************************
