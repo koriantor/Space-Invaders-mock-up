@@ -164,7 +164,7 @@ void nextState(){
 		break;
 
 	case GAME:
-		current_state = gameState(keys, &event_queue);
+		state = new Game(keys, event_queue);
 		break;
 
 	case OPTIONS_MENU://***

@@ -2,32 +2,7 @@
 
 
 
-//***************************
-// GLOBAL VARIABLES - moving these to cpp file
-//***************************
-namespace game{
-	bool done;
-	bool render;
 
-	int laser_cooldown;
-
-	//player's ship
-	ship player;
-	ALLEGRO_BITMAP* player_ship;
-
-	//player's lasers
-	vector<laser> player_lasers;
-	ALLEGRO_BITMAP* player_laser;
-
-	//array for all keys used in game
-	bool *keys;
-
-
-	//int for next state
-	STATES next_state;
-}
-
-using namespace game;
 
 
 
@@ -35,42 +10,37 @@ using namespace game;
 
 
  
-STATES gameState(bool* keys0, ALLEGRO_EVENT_QUEUE** event_queue0){
+Game::Game(bool* keys0, ALLEGRO_EVENT_QUEUE* event_queue0):
+	State(keys0, event_queue0)
+{
 
 
-	//GLOBAL VARIABLE DECLARATIONS
-	//****************************************
-	done = false;
-	render = true;
+	// VARIABLE DECLARATIONS
+	//**********************************************************
 
 	laser_cooldown = 0;
 
-	keys = keys0;	
-
 	next_state = MAIN_MENU;
+	
+
+	//SPRITES
 	//***************************************
-
-		
-	
-
-	
-
-	//SPRITE SHEETS
-	//*****************************************************************
 	player_ship = al_load_bitmap("images/player_ship.png");
 	al_convert_mask_to_alpha(player_ship, al_map_rgb(255,0,255));
 
 	player_laser = al_load_bitmap("images/player_laser.png");
 	al_convert_mask_to_alpha(player_laser, al_map_rgb(255,0,255));
+	
+	//**********************************************************
 
-	//*****************************************************************
+}
 
+
+	STATES Game::StateFunction(){
 
 	// create player ship object, then draw
 	player = ship(player_ship, 4, 4, 30, 48, 48, WIDTH/2 - 24, HEIGHT - 48, 0, 0, 2, 2);
 	player.draw();
-
-	
 
 	
 
@@ -88,9 +58,9 @@ STATES gameState(bool* keys0, ALLEGRO_EVENT_QUEUE** event_queue0){
 	//**GAME LOOP****GAME LOOP****GAME LOOP**
 	while(!done){
 		ALLEGRO_EVENT ev;
-		al_wait_for_event(*event_queue0, &ev);
+		al_wait_for_event(event_queue, &ev);
 
-		g_executeEvent(ev);
+		executeEvent(ev);
 
 	}
 
@@ -112,114 +82,17 @@ STATES gameState(bool* keys0, ALLEGRO_EVENT_QUEUE** event_queue0){
 
 
 
-//********************
-//Function will call the appropriate function to hadle the event handed to it
-//
-//********************
-
-void g_executeEvent(ALLEGRO_EVENT ev0){
-	
-	//KEYBOARD EVENTS
-
-	//key down events
-	if (ev0.type == ALLEGRO_EVENT_KEY_DOWN){
-		g_keyDownEvents(ev0);
-	}
-
-	//key up events
-	else if (ev0.type == ALLEGRO_EVENT_KEY_UP){
-		g_keyUpEvents(ev0);
-	}
-
-	//timer events(frame refresh)
-	else if (ev0.type == ALLEGRO_EVENT_TIMER){
-		g_timerEvent();
-	}
-}
 
 
-//********************
-// Catch all function to store a key as pressed
-//
-//********************
-
-void g_keyDownEvents(ALLEGRO_EVENT ev0){
-
-	switch(ev0.keyboard.keycode){
 
 
-	case ALLEGRO_KEY_UP:
-		keys[KEY_UP] = true;
-		break;
-			
-	case ALLEGRO_KEY_DOWN:
-		keys[KEY_DOWN] = true;
-		break;
-			
-	case ALLEGRO_KEY_RIGHT:
-		keys[KEY_RIGHT] = true;
-		break;
-			
-	case ALLEGRO_KEY_LEFT:
-		keys[KEY_LEFT] = true;
-		break;
-
-	case ALLEGRO_KEY_ENTER:
-		keys[KEY_ENTER] = true;
-		break;
-			
-	case ALLEGRO_KEY_SPACE:
-		keys[KEY_SPACE] = true;
-		break;
-
-	}
-}
-
-//********************
-// Catch-all fucntion to store a key as not pressed
-//
-//********************
-
-void g_keyUpEvents(ALLEGRO_EVENT ev0){
-
-	switch(ev0.keyboard.keycode){
-
-	case ALLEGRO_KEY_UP:
-		keys[KEY_UP] = false;
-		break;
-
-	case ALLEGRO_KEY_DOWN:
-		keys[KEY_DOWN] = false;
-		break;
-
-	case ALLEGRO_KEY_RIGHT:
-		keys[KEY_RIGHT] = false;
-		break;
-
-	case ALLEGRO_KEY_LEFT:
-		keys[KEY_LEFT] = false;
-		break;
-
-	case ALLEGRO_KEY_SPACE:
-		keys[KEY_SPACE] = false;
-		break;
-
-	case ALLEGRO_KEY_ENTER:
-		keys[KEY_ENTER] = false;
-		break;
-
-	case ALLEGRO_KEY_ESCAPE:
-		done = true;
-		break;
-	}
-}
 
 //********************
 // Timer/Screen update function
 //
 //********************
 
-void g_timerEvent(){
+void Game::timerEvent(){
 	//**********************************
 	//Update the metadata for the display 
 	//
@@ -228,17 +101,24 @@ void g_timerEvent(){
 
 	//check player ship movement keys
 	if (keys[KEY_RIGHT]){
-		g_rightKeyEvents();
+		Key_Right_Events();
 	}
 
 	if (keys[KEY_LEFT]){
-		g_leftKeyEvents();
+		Key_Left_Events();
 	}
 			
 	//manage fire laser key
 	if (keys[KEY_SPACE]){
-		g_spaceKeyEvents();
+		Key_Space_Events();
 	}
+
+	if (keys[KEY_ESCAPE]){
+		done = true;
+	}
+
+
+
 
 	if (laser_cooldown > 0){
 		//decrement cooldown
@@ -308,7 +188,7 @@ void g_timerEvent(){
 //
 //********************
 
-void g_rightKeyEvents(){
+void Game::Key_Right_Events(){
 	player.setDX(PLAYER_SPEED);
 	if (player.getX() <= 720 - player.getFrameWidth() - PLAYER_SPEED){
 		player.move();
@@ -321,7 +201,7 @@ void g_rightKeyEvents(){
 //
 //********************
 
-void g_leftKeyEvents(){
+void Game::Key_Left_Events(){
 	player.setDX(-PLAYER_SPEED);
 	if (player.getX() >= PLAYER_SPEED){
 		player.move();
@@ -334,7 +214,7 @@ void g_leftKeyEvents(){
 //
 //********************
 
-void g_spaceKeyEvents(){
+void Game::Key_Space_Events(){
 	//if able to fire laser
 	if (laser_cooldown == 0){
 
@@ -343,7 +223,7 @@ void g_spaceKeyEvents(){
 		
 
 	 
-		//reset coodlown
+		//reset cooldown
 		laser_cooldown = LASER_COOLDOWN;
 	}
 }

@@ -5,6 +5,7 @@
 #include "Ship.h"
 #include "Laser.h"
 #include "Constants.h"
+#include "State.h"
 
 #pragma once
 
@@ -24,22 +25,46 @@ using namespace std;
 
 
 
-STATES gameState(bool* keys0, ALLEGRO_EVENT_QUEUE** event_queue0);
+
+class Game:public State{
+private:
+
+	//***************************
+	// GLOBAL VARIABLES
+	//***************************
 
 
-//********************************
-// GAME FUNCTIONS
-//********************************
+	//player's ship
+	ship player;
+	ALLEGRO_BITMAP* player_ship;
 
-void g_executeEvent(ALLEGRO_EVENT ev0);
+	//player's lasers
+	vector<laser> player_lasers;
+	ALLEGRO_BITMAP* player_laser;
+	
+	int laser_cooldown;
 
-void g_keyDownEvents(ALLEGRO_EVENT ev0);
-void g_keyUpEvents(ALLEGRO_EVENT ev0);
-void g_timerEvent();
+	//**************************
 
-// Event for every key
-void g_rightKeyEvents();
-void g_leftKeyEvents();
-void g_spaceKeyEvents();
+public:
 
-//*******************************
+	Game();
+	Game(bool* keys0, ALLEGRO_EVENT_QUEUE* event_queue0);
+
+	STATES StateFunction();
+	void timerEvent();
+
+
+	//********************************
+	// GAME FUNCTIONS
+	//********************************
+
+	// Event for every key
+	void Key_Right_Events();
+	void Key_Left_Events();
+	void Key_Space_Events();
+
+	//*******************************
+
+
+};
