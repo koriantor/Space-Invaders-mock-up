@@ -6,7 +6,6 @@
 
 MainMenu::MainMenu(){}
 
-
 MainMenu::MainMenu(bool* keys0, ALLEGRO_EVENT_QUEUE* event_queue0):
 	State(keys0, event_queue0){
 	
@@ -16,6 +15,10 @@ MainMenu::MainMenu(bool* keys0, ALLEGRO_EVENT_QUEUE* event_queue0):
 	
 	//variable to store current selection
 	selection = PLAY_BUTTON;
+
+	//set keys ENTER and ESCAPE to false so no over-flow of information
+	keys[KEY_ENTER] = false;
+	keys[KEY_ESCAPE] = false;
 	
 	// these bools track keep track of when the up or down keys are actually being pressed
 	bool key_up_still_pressed = false;
@@ -36,7 +39,12 @@ MainMenu::MainMenu(bool* keys0, ALLEGRO_EVENT_QUEUE* event_queue0):
 	//************************
 }
 	
-	
+MainMenu::~MainMenu(){
+	//delete bitmaps
+	al_destroy_bitmap(play_button);
+	al_destroy_bitmap(options_button);
+	al_destroy_bitmap(exit_button);
+}	
 	
 
 
@@ -88,11 +96,6 @@ STATES MainMenu::StateFunction(){
 
 	}
 
-	//delete bitmaps
-	al_destroy_bitmap(play_button);
-	al_destroy_bitmap(options_button);
-	al_destroy_bitmap(exit_button);
-
 
 	if (keys[KEY_ENTER])
 		return BUTTONSToSTATES(selection);
@@ -114,11 +117,18 @@ void MainMenu::timerEvent(){
 	//
 	//*******************************************************
 
-	//check if selection hs been affirmed
-	if (keys[KEY_ENTER]){
+	//default exit
+	//if (keys[KEY_ESCAPE]){
+	//	done = true;
+	//	return;
+	//}
+
+	//check if selection has been affirmed
+	if (keys[KEY_ENTER] || keys[KEY_ESCAPE]){
 		done = true;
 		return;
 	}
+
 	
 	//maybe move button selection
 	moveButtons();
@@ -186,7 +196,7 @@ void MainMenu::moveButtons(){
 
 void MainMenu::menuUp(){
 	//advance old button sprite
-	advanceButton(selection);
+	advanceButton();
 	
 	//determine new selection
 	if (--selection < PLAY_BUTTON){
@@ -194,11 +204,11 @@ void MainMenu::menuUp(){
 	}
 
 	//advance new button sprite
-	advanceButton(selection);
+	advanceButton();
 }
 void MainMenu::menuDown(){
 	//advance old button sprite
-	advanceButton(selection);
+	advanceButton();
 
 	//determine new selection
 	if (++selection > EXIT_BUTTON){
@@ -206,12 +216,12 @@ void MainMenu::menuDown(){
 	}
 
 	//advance new button sprite
-	advanceButton(selection);
+	advanceButton();
 }
 
 //function to advance button sprites
-void MainMenu::advanceButton(int selection0){
-	switch(selection0){
+void MainMenu::advanceButton(){
+	switch(selection){
 
 	case PLAY_BUTTON:
 		Play_Button.stepFrame();
@@ -235,6 +245,7 @@ STATES MainMenu::BUTTONSToSTATES(int state0){
 	case PLAY_BUTTON: 		return GAME; 			break;
 	case OPTIONS_BUTTON: 	return OPTIONS_MENU; 	break;
 	case EXIT_BUTTON: 		return EXIT; 			break;
+	default:				return EXIT;			break;
 	}
 }
 

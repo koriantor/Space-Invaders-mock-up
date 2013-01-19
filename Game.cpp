@@ -1,4 +1,5 @@
 #include "game.h"
+#include "Pause_Menu.h"
 
 
 
@@ -8,7 +9,7 @@
 
 
 
-
+Game::Game(){}
  
 Game::Game(bool* keys0, ALLEGRO_EVENT_QUEUE* event_queue0):
 	State(keys0, event_queue0)
@@ -19,6 +20,10 @@ Game::Game(bool* keys0, ALLEGRO_EVENT_QUEUE* event_queue0):
 	//**********************************************************
 
 	laser_cooldown = 0;
+
+	//set keys ENTER and ESCAPE to false so no over-flow of information
+	keys[KEY_ENTER] = false;
+	keys[KEY_ESCAPE] = false;
 
 	next_state = MAIN_MENU;
 	
@@ -35,21 +40,40 @@ Game::Game(bool* keys0, ALLEGRO_EVENT_QUEUE* event_queue0):
 
 }
 
+Game::~Game(){
 
-	STATES Game::StateFunction(){
+	// Destroy all lasers
+	while(!player_lasers.empty()){
+		//al_destroy_bitmap(player_lasers[0].image);
+		player_lasers.erase(player_lasers.begin());
+	}
+
+
+	// Clean up allegro objects
+	al_destroy_bitmap(player_ship);
+	al_destroy_bitmap(player_laser);
+
+}
+
+
+
+//*************************************************
+// GAME STATE FUNCTION
+// Returns the enum value for the next state
+//
+//*************************************************
+STATES Game::StateFunction(){
+
+	// FIRST SCREEN UPDATE
+	//********************************
 
 	// create player ship object, then draw
 	player = ship(player_ship, 4, 4, 30, 48, 48, WIDTH/2 - 24, HEIGHT - 48, 0, 0, 2, 2);
 	player.draw();
 
-	
-
 	al_flip_display();
 	render = false;
-
-
-
-
+	//******************************************
 
 
 
@@ -63,18 +87,6 @@ Game::Game(bool* keys0, ALLEGRO_EVENT_QUEUE* event_queue0):
 		executeEvent(ev);
 
 	}
-
-
-	// Destroy all lasers
-	while(!player_lasers.empty()){
-		//al_destroy_bitmap(player_lasers[0].image);
-		player_lasers.erase(player_lasers.begin());
-	}
-
-
-	// Clean up allegro objects
-	al_destroy_bitmap(player_ship);
-	al_destroy_bitmap(player_laser);
  
 	return next_state;
 }
@@ -117,6 +129,19 @@ void Game::timerEvent(){
 		done = true;
 	}
 
+	//Pause Screen
+	if (keys[KEY_ENTER]){
+		Pause_Menu pause = Pause_Menu(keys, event_queue);
+		if (pause.StateFunction() == next_state){
+			done = true; 
+			return;
+		}
+
+		//set keys ENTER and ESCAPE to false so no over-flow of information
+		keys[KEY_ENTER] = false;
+		keys[KEY_ESCAPE] = false;
+	}
+	
 
 
 

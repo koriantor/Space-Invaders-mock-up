@@ -50,8 +50,20 @@ public:
 
 	Game();
 	Game(bool* keys0, ALLEGRO_EVENT_QUEUE* event_queue0);
+	~Game();
 
+
+	//*************************************************
+	// GAME STATE FUNCTION
+	// Returns the enum value for the next state
+	//
+	//*************************************************
 	STATES StateFunction();
+
+	//********************
+	// Timer/Screen update function
+	//
+	//********************
 	void timerEvent();
 
 

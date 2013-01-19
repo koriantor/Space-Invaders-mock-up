@@ -6,16 +6,19 @@ State::State(){}
  
 State::State(bool* keys0, ALLEGRO_EVENT_QUEUE* event_queue0){
 	keys = keys0;
-	event_queue= event_queue0;
+	event_queue = event_queue0;
+	next_state = EXIT;
 
 	done = false;
 	render = true;
 }
 
+State::~State(){}
+
 //*****************************************************
 //basic outline for a state function with the loop
 //*****************************************************
-//int DoState{
+//STATES StateFunction{
 //	//**GAME LOOP****GAME LOOP****GAME LOOP**
 //	while(!done){
 //		ALLEGRO_EVENT ev;
@@ -28,9 +31,6 @@ State::State(bool* keys0, ALLEGRO_EVENT_QUEUE* event_queue0){
 //	return next_state;
 //}
 
-//STATES State::StateFunction(){
-//	return EXIT;
-//}
 
 
 

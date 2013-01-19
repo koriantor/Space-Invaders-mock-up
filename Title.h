@@ -51,6 +51,9 @@ public:
 
 	Title(bool* keys0, ALLEGRO_EVENT_QUEUE* event_queue0);
 	
+	~Title();
+
+
 	//******************************
 	// THE ACTUAL TITLE FUNCTION
 	//******************************
@@ -58,4 +61,6 @@ public:
 	virtual STATES StateFunction();
 
 	void timerEvent();
+
+	
 };

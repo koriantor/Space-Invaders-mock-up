@@ -31,6 +31,8 @@ public:
 	State(bool* keys0, ALLEGRO_EVENT_QUEUE* event_queue0);
 
 	virtual STATES StateFunction() = 0;
+	virtual void timerEvent() = 0;
+	virtual ~State() = 0;
 
 
 	//********************************
@@ -42,7 +44,6 @@ public:
 	void keyDownEvents(ALLEGRO_EVENT ev0);
 	void keyUpEvents(ALLEGRO_EVENT ev0);
 
-	virtual void timerEvent();
 
 
 	// Event for every key (other special keys found in keycodes.h)

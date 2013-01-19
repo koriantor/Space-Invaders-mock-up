@@ -77,6 +77,7 @@ public:
 
 	MainMenu(bool* keys0, ALLEGRO_EVENT_QUEUE* event_queue0);
 	
+	~MainMenu();
 	
 	
 	//*************************************************
@@ -105,7 +106,7 @@ public:
 	void menuDown();
 
 	//function to advance button sprites
-	void advanceButton(int selection0);
+	void advanceButton();
 
 	//function to convert BUTTONS to STATES
 	STATES BUTTONSToSTATES(int state0);

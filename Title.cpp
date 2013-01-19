@@ -32,7 +32,10 @@ Title::Title(bool* keys0, ALLEGRO_EVENT_QUEUE* event_queue0):
 
 }
 
-
+Title::~Title(){
+	al_destroy_bitmap(title);
+	al_destroy_bitmap(title_ship);
+}
 
 
 
@@ -63,10 +66,6 @@ STATES Title::StateFunction(){
 		executeEvent(ev);
 
 	}
-
-
-	al_destroy_bitmap(title);
-	al_destroy_bitmap(title_ship);
 
 	return next_state;
 }
