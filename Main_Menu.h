@@ -16,7 +16,7 @@
 
 // dimensions of the button sprites
 #define BUTTON_WIDTH 400
-#define BUTTON_HEIGHT 57
+#define BUTTON_HEIGHT 58
 
 // locations of the button sprites
 #define PLAY_X 50

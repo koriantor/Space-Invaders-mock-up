@@ -13,15 +13,6 @@
 #define FPS 60.0
 
 
-//enum KEYS{
-//	UP,
-//	DOWN,
-//	RIGHT,
-//	LEFT,
-//	SPACE,
-//	ENTER
-//};
-
 enum STATES{
 	TITLE,
 	MAIN_MENU,

@@ -31,9 +31,12 @@ Pause_Menu::Pause_Menu(bool* keys0, ALLEGRO_EVENT_QUEUE* event_queue0):
 	pause_resume = al_load_bitmap("images/pause_resume.png");
 	pause_exit = al_load_bitmap("images/pause_exit.png");
 	
-	Pause_Title = Sprite(pause_title, 1, 1, 0, PAUSE_BUTTON_WIDTH, PAUSE_BUTTON_HEIGHT, 0, 0, 0, 0);
-	Pause_Resume = Sprite(pause_resume, 1, 2, 0, PAUSE_BUTTON_WIDTH, PAUSE_BUTTON_HEIGHT, 0, 58, 0, 0);
-	Pause_Exit = Sprite(pause_exit, 1, 2, 0, PAUSE_BUTTON_WIDTH, PAUSE_BUTTON_HEIGHT, 0, 116, 0, 0);
+	Pause_Title = Sprite(pause_title, 1, 1, 0, PAUSE_BUTTON_WIDTH, PAUSE_BUTTON_HEIGHT,
+						PAUSE_BUTTON_X, PAUSE_TITLE_Y, 0, 0);
+	Pause_Resume = Sprite(pause_resume, 1, 2, 0, PAUSE_BUTTON_WIDTH, PAUSE_BUTTON_HEIGHT, 
+						PAUSE_BUTTON_X, PAUSE_RESUME_Y, 0, 0);
+	Pause_Exit = Sprite(pause_exit, 1, 2, 0, PAUSE_BUTTON_WIDTH, PAUSE_BUTTON_HEIGHT,
+						PAUSE_BUTTON_X, PAUSE_EXIT_Y, 0, 0);
 }
 
 Pause_Menu::~Pause_Menu(){
