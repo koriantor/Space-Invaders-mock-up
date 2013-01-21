@@ -37,7 +37,7 @@ void Sprite::draw(){
 //returns true only if the sprite's frame has changed
 bool Sprite::stepFrame(){
 	//increment deelay count
-	if (delayCount <= animationDelay){
+	if (delayCount < animationDelay){
 		delayCount++;
 		return false;
 	} 
